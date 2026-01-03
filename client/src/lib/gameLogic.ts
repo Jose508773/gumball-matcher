@@ -42,8 +42,11 @@ export interface LevelConfig {
 const PIECE_TYPES: PieceType[] = ['red', 'yellow', 'blue', 'pink', 'purple', 'orange'];
 
 // Generate random piece
-export function generateRandomPiece(row: number, col: number): GamePiece {
-  const type = PIECE_TYPES[Math.floor(Math.random() * PIECE_TYPES.length)];
+export function generateRandomPiece(row: number, col: number, excludeTypes: PieceType[] = []): GamePiece {
+  const availableTypes = PIECE_TYPES.filter(t => !excludeTypes.includes(t));
+  const type = availableTypes.length > 0 
+    ? availableTypes[Math.floor(Math.random() * availableTypes.length)]
+    : PIECE_TYPES[Math.floor(Math.random() * PIECE_TYPES.length)];
   return {
     id: `${row}-${col}-${Date.now()}-${Math.random()}`,
     type,
@@ -52,15 +55,38 @@ export function generateRandomPiece(row: number, col: number): GamePiece {
   };
 }
 
-// Initialize game board
+// Initialize game board without any pre-existing matches
 export function initializeBoard(gridSize: number): GamePiece[][] {
   const board: GamePiece[][] = [];
+  
   for (let row = 0; row < gridSize; row++) {
     board[row] = [];
     for (let col = 0; col < gridSize; col++) {
-      board[row][col] = generateRandomPiece(row, col);
+      // Find types that would create a match
+      const forbiddenTypes: PieceType[] = [];
+      
+      // Check horizontal - if the two pieces to the left are the same type, exclude that type
+      if (col >= 2) {
+        const left1 = board[row][col - 1];
+        const left2 = board[row][col - 2];
+        if (left1.type === left2.type) {
+          forbiddenTypes.push(left1.type);
+        }
+      }
+      
+      // Check vertical - if the two pieces above are the same type, exclude that type
+      if (row >= 2) {
+        const above1 = board[row - 1][col];
+        const above2 = board[row - 2][col];
+        if (above1.type === above2.type) {
+          forbiddenTypes.push(above1.type);
+        }
+      }
+      
+      board[row][col] = generateRandomPiece(row, col, forbiddenTypes);
     }
   }
+  
   return board;
 }
 
@@ -224,6 +250,56 @@ export function findMatchPositions(board: GamePiece[][]): MatchGroup[] {
   return matchGroups;
 }
 
+// Helper to get forbidden types for a position (to avoid creating matches)
+function getForbiddenTypes(board: GamePiece[][], row: number, col: number): PieceType[] {
+  const gridSize = board.length;
+  const forbidden: PieceType[] = [];
+  
+  // Check horizontal left (two pieces to the left)
+  if (col >= 2 && board[row][col - 1] && board[row][col - 2]) {
+    if (board[row][col - 1].type === board[row][col - 2].type) {
+      forbidden.push(board[row][col - 1].type);
+    }
+  }
+  
+  // Check horizontal right (two pieces to the right)
+  if (col <= gridSize - 3 && board[row][col + 1] && board[row][col + 2]) {
+    if (board[row][col + 1].type === board[row][col + 2].type) {
+      forbidden.push(board[row][col + 1].type);
+    }
+  }
+  
+  // Check horizontal middle (one left, one right)
+  if (col >= 1 && col <= gridSize - 2 && board[row][col - 1] && board[row][col + 1]) {
+    if (board[row][col - 1].type === board[row][col + 1].type) {
+      forbidden.push(board[row][col - 1].type);
+    }
+  }
+  
+  // Check vertical above (two pieces above)
+  if (row >= 2 && board[row - 1] && board[row - 2]) {
+    if (board[row - 1][col].type === board[row - 2][col].type) {
+      forbidden.push(board[row - 1][col].type);
+    }
+  }
+  
+  // Check vertical below (two pieces below)
+  if (row <= gridSize - 3 && board[row + 1] && board[row + 2]) {
+    if (board[row + 1][col].type === board[row + 2][col].type) {
+      forbidden.push(board[row + 1][col].type);
+    }
+  }
+  
+  // Check vertical middle (one above, one below)
+  if (row >= 1 && row <= gridSize - 2 && board[row - 1] && board[row + 1]) {
+    if (board[row - 1][col].type === board[row + 1][col].type) {
+      forbidden.push(board[row - 1][col].type);
+    }
+  }
+  
+  return [...new Set(forbidden)]; // Remove duplicates
+}
+
 // Remove matched pieces and apply gravity
 export function removeMatchedAndApplyGravity(
   board: GamePiece[][],
@@ -232,7 +308,7 @@ export function removeMatchedAndApplyGravity(
   const gridSize = board.length;
   let newBoard = board.map(row => [...row]);
 
-  // Remove matched pieces
+  // Remove matched pieces and apply gravity column by column
   for (let col = 0; col < gridSize; col++) {
     let writePos = gridSize - 1;
     for (let row = gridSize - 1; row >= 0; row--) {
@@ -243,9 +319,10 @@ export function removeMatchedAndApplyGravity(
         writePos--;
       }
     }
-    // Fill empty spaces with new pieces
+    // Fill empty spaces with new pieces (avoiding matches)
     for (let row = writePos; row >= 0; row--) {
-      newBoard[row][col] = generateRandomPiece(row, col);
+      const forbiddenTypes = getForbiddenTypes(newBoard, row, col);
+      newBoard[row][col] = generateRandomPiece(row, col, forbiddenTypes);
     }
   }
 
