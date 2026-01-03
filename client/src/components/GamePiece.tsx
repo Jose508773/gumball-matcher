@@ -1,10 +1,10 @@
 /**
- * Game Piece Component
- * Design Philosophy: Candy Pop Maximalism
- * - Glossy 3D appearance with highlights and shadows
+ * Game Piece Component - Gumball Style
+ * Design Philosophy: Realistic 3D Gumball Appearance
+ * - Glossy spherical 3D look with specular highlights
+ * - Realistic light reflection like a gumball machine
+ * - Vibrant candy colors with depth
  * - Bouncy animations on interaction
- * - Vibrant, saturated colors
- * - Exciting match animations
  */
 
 import { GamePiece as GamePieceType, PieceType } from '@/lib/gameLogic';
@@ -20,47 +20,55 @@ interface GamePieceProps {
   isAnimating: boolean;
 }
 
+// Gumball color palette - rich, saturated candy colors
 const PIECE_COLORS: Record<PieceType, { 
-  bg: string; 
-  shadow: string; 
-  highlight: string;
+  base: string;
+  light: string;
+  dark: string;
   glow: string;
+  shadow: string;
 }> = {
   red: {
-    bg: 'from-red-500 to-red-600',
-    shadow: 'shadow-red-400/50',
-    highlight: 'from-red-300',
+    base: '#E53935',
+    light: '#FF6F60',
+    dark: '#AB000D',
     glow: '#ef4444',
+    shadow: 'rgba(171, 0, 13, 0.5)',
   },
   yellow: {
-    bg: 'from-yellow-400 to-yellow-500',
-    shadow: 'shadow-yellow-300/50',
-    highlight: 'from-yellow-200',
+    base: '#FDD835',
+    light: '#FFFF6B',
+    dark: '#C6A700',
     glow: '#eab308',
+    shadow: 'rgba(198, 167, 0, 0.5)',
   },
   blue: {
-    bg: 'from-blue-500 to-blue-600',
-    shadow: 'shadow-blue-400/50',
-    highlight: 'from-blue-300',
+    base: '#1E88E5',
+    light: '#6AB7FF',
+    dark: '#005CB2',
     glow: '#3b82f6',
+    shadow: 'rgba(0, 92, 178, 0.5)',
   },
   pink: {
-    bg: 'from-pink-500 to-pink-600',
-    shadow: 'shadow-pink-400/50',
-    highlight: 'from-pink-300',
+    base: '#EC407A',
+    light: '#FF77A9',
+    dark: '#B4004E',
     glow: '#ec4899',
+    shadow: 'rgba(180, 0, 78, 0.5)',
   },
   purple: {
-    bg: 'from-purple-500 to-purple-600',
-    shadow: 'shadow-purple-400/50',
-    highlight: 'from-purple-300',
+    base: '#8E24AA',
+    light: '#C158DC',
+    dark: '#5C007A',
     glow: '#a855f7',
+    shadow: 'rgba(92, 0, 122, 0.5)',
   },
   orange: {
-    bg: 'from-orange-500 to-orange-600',
-    shadow: 'shadow-orange-400/50',
-    highlight: 'from-orange-300',
+    base: '#FB8C00',
+    light: '#FFBD45',
+    dark: '#C25E00',
     glow: '#f97316',
+    shadow: 'rgba(194, 94, 0, 0.5)',
   },
 };
 
@@ -148,12 +156,12 @@ export default function GamePiece({
 
   return (
     <AnimatePresence mode="wait">
-      <motion.div
+    <motion.div
         key={piece.id}
-        className="relative w-full h-full cursor-pointer"
-        onClick={onClick}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+      className="relative w-full h-full cursor-pointer"
+      onClick={onClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
         initial={{ scale: 0, rotate: -180, opacity: 0 }}
         animate={getAnimateState()}
         exit={{
@@ -220,8 +228,8 @@ export default function GamePiece({
                 initial={{ 
                   x: '-50%', 
                   y: '-50%',
-                  scale: 0,
-                  opacity: 0,
+              scale: 0,
+              opacity: 0,
                 }}
                 animate={{
                   x: `calc(-50% + ${(i % 2 === 0 ? 1 : -1) * (25 + i * 8)}px)`,
@@ -261,32 +269,102 @@ export default function GamePiece({
           />
         )}
 
-        {/* Main piece circle */}
+        {/* Drop shadow under the gumball */}
+        <div
+          className="absolute bottom-[-8%] left-[15%] right-[15%] h-[15%] rounded-full blur-sm"
+          style={{
+            background: colors.shadow,
+            transform: 'scaleY(0.5)',
+          }}
+        />
+
+        {/* Main gumball sphere */}
         <div
           className={`
             relative w-full h-full rounded-full
-            bg-gradient-to-br ${colors.bg}
-            ${colors.shadow} shadow-lg
-            border-4 border-white/30
             transition-all duration-200
             ${isSelected ? 'ring-4 ring-yellow-300 ring-offset-2' : ''}
           `}
+          style={{
+            // 3D spherical gradient - darker at edges, lighter toward light source
+            background: `
+              radial-gradient(
+                ellipse 50% 50% at 35% 30%,
+                ${colors.light} 0%,
+                ${colors.base} 40%,
+                ${colors.dark} 100%
+              )
+            `,
+            boxShadow: `
+              inset -4px -4px 10px rgba(0, 0, 0, 0.3),
+              inset 4px 4px 10px rgba(255, 255, 255, 0.15),
+              0 4px 8px ${colors.shadow}
+            `,
+          }}
         >
-          {/* Glossy highlight */}
+          {/* Primary specular highlight - top left bright spot */}
           <div
-            className={`
-              absolute top-2 left-2 w-1/3 h-1/3
-              bg-gradient-to-br ${colors.highlight} to-transparent
-              rounded-full opacity-60 blur-sm
-            `}
+            className="absolute rounded-full"
+            style={{
+              top: '12%',
+              left: '18%',
+              width: '35%',
+              height: '35%',
+              background: `
+                radial-gradient(
+                  ellipse at 40% 40%,
+                  rgba(255, 255, 255, 0.95) 0%,
+                  rgba(255, 255, 255, 0.6) 30%,
+                  transparent 70%
+                )
+              `,
+            }}
           />
 
-          {/* Inner shine effect */}
+          {/* Secondary highlight - smaller, sharper reflection */}
           <div
-            className={`
-              absolute inset-1 rounded-full
-              bg-gradient-to-br from-white/20 to-transparent
-            `}
+            className="absolute rounded-full"
+            style={{
+              top: '8%',
+              left: '22%',
+              width: '18%',
+              height: '18%',
+              background: 'rgba(255, 255, 255, 0.9)',
+              filter: 'blur(1px)',
+            }}
+          />
+
+          {/* Rim light - subtle edge highlight */}
+          <div
+            className="absolute inset-0 rounded-full"
+            style={{
+              background: `
+                radial-gradient(
+                  ellipse 100% 100% at 50% 50%,
+                  transparent 60%,
+                  rgba(255, 255, 255, 0.1) 85%,
+                  rgba(255, 255, 255, 0.2) 100%
+                )
+              `,
+            }}
+          />
+
+          {/* Bottom reflection - like sitting on a surface */}
+          <div
+            className="absolute rounded-full"
+            style={{
+              bottom: '8%',
+              left: '25%',
+              width: '50%',
+              height: '20%',
+              background: `
+                radial-gradient(
+                  ellipse at 50% 100%,
+                  rgba(255, 255, 255, 0.15) 0%,
+                  transparent 70%
+                )
+              `,
+            }}
           />
           
           {/* Match sparkle overlay */}
@@ -325,15 +403,16 @@ export default function GamePiece({
           />
         )}
         
-        {/* Hover sparkle effect */}
+        {/* Hover glow effect */}
         {isHovered && !isMatched && !isSelected && (
           <motion.div
-            className="absolute inset-0 rounded-full pointer-events-none"
+            className="absolute inset-[-5%] rounded-full pointer-events-none"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             style={{
-              background: `radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3) 0%, transparent 50%)`,
+              background: `radial-gradient(circle, ${colors.glow}40 0%, transparent 70%)`,
+              filter: 'blur(4px)',
             }}
           />
         )}
