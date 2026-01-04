@@ -182,14 +182,14 @@ const GameBoard = forwardRef<GameBoardRef, GameBoardProps>(function GameBoard({
   return (
     <motion.div
       ref={boardRef}
-      className="w-full max-w-[min(90vw,90vh,32rem)] sm:max-w-lg md:max-w-xl lg:max-w-2xl mx-auto"
+      className="w-full h-full max-w-[min(85vw,calc(100vh-180px),32rem)] max-h-[min(85vw,calc(100vh-180px),32rem)] sm:max-w-lg sm:max-h-[32rem] md:max-w-xl md:max-h-[36rem] lg:max-w-2xl lg:max-h-[40rem] mx-auto"
       initial={{ scale: 0.95, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
       {/* Rainbow candy border animation */}
       <motion.div
-        className="p-1 sm:p-1.5 md:p-2 rounded-2xl sm:rounded-3xl md:rounded-[2rem]"
+        className="p-0.5 sm:p-1.5 md:p-2 rounded-xl sm:rounded-3xl md:rounded-[2rem] h-full"
         style={{
           background: 'linear-gradient(90deg, #FF6B6B, #FFE66D, #4ECDC4, #A78BFA, #F472B6, #FF6B6B)',
           backgroundSize: '200% 100%',
@@ -206,11 +206,11 @@ const GameBoard = forwardRef<GameBoardRef, GameBoardProps>(function GameBoard({
         {/* Board container with rounded frame */}
         <div
           className={`
-            relative rounded-xl sm:rounded-2xl md:rounded-3xl overflow-hidden
+            relative rounded-lg sm:rounded-2xl md:rounded-3xl overflow-hidden
             bg-gradient-to-b from-purple-900 via-purple-800 to-purple-900
-            p-2 sm:p-3 md:p-4 lg:p-6 shadow-2xl
-            border-2 sm:border-3 md:border-4 border-white/30
-            aspect-square
+            p-1 sm:p-2 md:p-4 lg:p-6 shadow-2xl
+            border sm:border-2 md:border-4 border-white/30
+            h-full
           `}
           style={{
             backgroundImage: `url('/images/game-background.png')`,
@@ -267,10 +267,10 @@ const GameBoard = forwardRef<GameBoardRef, GameBoardProps>(function GameBoard({
           </div>
 
           {/* Grid container */}
-          <div className="relative w-full h-full">
+          <div className="relative w-full h-full aspect-square">
             <div
               ref={gridRef}
-              className={`w-full h-full grid ${getGapClass()} p-1 sm:p-2 md:p-3 lg:p-4 bg-black/30 rounded-lg sm:rounded-xl md:rounded-2xl backdrop-blur-sm`}
+              className={`w-full h-full grid ${getGapClass()} p-0.5 sm:p-1 md:p-2 lg:p-3 bg-black/30 rounded-md sm:rounded-xl md:rounded-2xl backdrop-blur-sm`}
               style={{
                 gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
                 gridTemplateRows: `repeat(${gridSize}, 1fr)`,
