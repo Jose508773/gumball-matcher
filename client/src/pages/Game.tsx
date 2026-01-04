@@ -350,6 +350,44 @@ export default function Game() {
     [gameState, playSelect]
   );
 
+  // Handle swipe/drag swap
+  const handleSwap = useCallback(
+    (from: { row: number; col: number }, to: { row: number; col: number }) => {
+      if (!gameState || gameState.isAnimating || gameState.gameOver || gameState.levelComplete)
+        return;
+
+      // Play select sound for feedback
+      playSelect();
+
+      // Store the original board before swapping (for potential swap-back)
+      pendingSwapRef.current = {
+        pos1: from,
+        pos2: to,
+        originalBoard: gameState.board.map(row => [...row]),
+      };
+
+      // Swap pieces
+      const newBoard = swapPieces(gameState.board, from, to);
+
+      setGameState(prev => ({
+        ...prev!,
+        board: newBoard,
+        selectedPiece: null,
+        moves: prev!.moves + 1,
+        isAnimating: true,
+      }));
+
+      // Reset animation flag after a short delay to allow match checking
+      setTimeout(() => {
+        setGameState(prev => ({
+          ...prev!,
+          isAnimating: false,
+        }));
+      }, 150);
+    },
+    [gameState, playSelect]
+  );
+
   // Handle next level
   const handleNextLevel = () => {
     setShowLevelComplete(false);
@@ -459,6 +497,7 @@ export default function Game() {
           matchedPieces={gameState.matchedPieces}
           invalidSwapPieces={invalidSwapPieces}
           onPieceClick={handlePieceClick}
+          onSwap={handleSwap}
           isAnimating={gameState.isAnimating}
         />
       </div>

@@ -16,6 +16,7 @@ interface GamePieceProps {
   isSelected: boolean;
   isMatched: boolean;
   isInvalidSwap?: boolean;
+  isDragging?: boolean;
   onClick: () => void;
   isAnimating: boolean;
 }
@@ -77,6 +78,7 @@ export default function GamePiece({
   isSelected,
   isMatched,
   isInvalidSwap = false,
+  isDragging = false,
   onClick,
   isAnimating,
 }: GamePieceProps) {
@@ -94,6 +96,15 @@ export default function GamePiece({
           'brightness(1.8)',
           'brightness(2.5)',
         ],
+      };
+    }
+    if (isDragging) {
+      return {
+        scale: 1.15,
+        y: -5,
+        rotate: 0,
+        opacity: 1,
+        filter: 'brightness(1.1)',
       };
     }
     if (isInvalidSwap) {
