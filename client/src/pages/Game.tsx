@@ -29,6 +29,7 @@ import {
   isLevelComplete,
   isGameOver,
 } from '@/lib/gameLogic';
+import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { Home } from 'lucide-react';
 import { useLocation } from 'wouter';
 
@@ -48,6 +49,9 @@ export default function Game() {
   const [screenShake, setScreenShake] = useState(false);
   const gameLoopRef = useRef<NodeJS.Timeout | null>(null);
   const matchCheckRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Sound effects
+  const { playMatch, playSelect, playCombo, playLevelComplete, playGameOver, playInvalid } = useSoundEffects();
   const gameBoardRef = useRef<GameBoardRef>(null);
   const pendingSwapRef = useRef<{
     pos1: { row: number; col: number };
@@ -172,10 +176,14 @@ export default function Game() {
         setFloatingPointsTrigger(true);
         setTimeout(() => setFloatingPointsTrigger(false), 100);
 
+        // Play match sound
+        playMatch();
+
         // Trigger combo effect for cascades
         if (currentCombo >= 2) {
           setComboTrigger(true);
           setTimeout(() => setComboTrigger(false), 100);
+          playCombo(); // Extra combo sound
         }
 
         // Screen shake for big matches (5+ pieces or combo 3+)
@@ -210,6 +218,9 @@ export default function Game() {
         const piece1Id = gameState.board[pos1.row][pos1.col].id;
         const piece2Id = gameState.board[pos2.row][pos2.col].id;
 
+        // Play invalid sound
+        playInvalid();
+
         // Show invalid swap animation
         setInvalidSwapPieces(new Set([piece1Id, piece2Id]));
 
@@ -235,7 +246,7 @@ export default function Game() {
     return () => {
       if (matchCheckRef.current) clearTimeout(matchCheckRef.current);
     };
-  }, [gameState?.board, gameState?.isAnimating]);
+  }, [gameState?.board, gameState?.isAnimating, playMatch, playCombo, playInvalid]);
 
   // Remove matched pieces and apply gravity
   useEffect(() => {
@@ -283,6 +294,9 @@ export default function Game() {
         return;
 
       const newSelectedPiece = { row, col };
+
+      // Play select sound
+      playSelect();
 
       if (!gameState.selectedPiece) {
         // Select first piece
@@ -333,7 +347,7 @@ export default function Game() {
         }));
       }
     },
-    [gameState]
+    [gameState, playSelect]
   );
 
   // Handle next level
@@ -374,14 +388,16 @@ export default function Game() {
   useEffect(() => {
     if (gameState?.levelComplete) {
       setShowLevelComplete(true);
+      playLevelComplete();
     }
-  }, [gameState?.levelComplete]);
+  }, [gameState?.levelComplete, playLevelComplete]);
 
   useEffect(() => {
     if (gameState?.gameOver) {
       setShowGameOver(true);
+      playGameOver();
     }
-  }, [gameState?.gameOver]);
+  }, [gameState?.gameOver, playGameOver]);
 
   if (!gameState) {
     return (
