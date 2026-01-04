@@ -402,37 +402,40 @@ export default function Game() {
   return (
     <motion.div
       animate={screenShakeControls}
-      className="min-h-screen bg-gradient-to-b from-pink-200 via-purple-200 to-cyan-200 py-6 px-4"
+      className="min-h-screen min-h-[100dvh] bg-gradient-to-b from-pink-200 via-purple-200 to-cyan-200 py-2 px-2 sm:py-4 sm:px-4 md:py-6 overflow-hidden"
       style={{
         backgroundImage: `url('/images/game-background.png')`,
         backgroundSize: 'cover',
         backgroundAttachment: 'fixed',
+        touchAction: 'manipulation', // Prevent double-tap zoom on mobile
       }}
     >
-      {/* Home button */}
-      <div className="max-w-2xl mx-auto mb-4 flex justify-end">
+      {/* Home button - positioned absolutely on mobile for more space */}
+      <div className="absolute top-2 right-2 sm:static sm:max-w-2xl sm:mx-auto sm:mb-4 sm:flex sm:justify-end z-20">
         <Button
           onClick={handleHome}
           variant="outline"
           size="icon"
-          className="rounded-full w-12 h-12 border-4 border-white bg-white/80 hover:bg-white shadow-lg"
+          className="rounded-full w-10 h-10 sm:w-12 sm:h-12 border-2 sm:border-4 border-white bg-white/80 hover:bg-white shadow-lg active:scale-95 transition-transform"
         >
-          <Home className="w-6 h-6 text-primary" />
+          <Home className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
         </Button>
       </div>
 
       {/* Game UI */}
-      <GameUI
-        score={gameState.score}
-        targetScore={config.targetScore}
-        lives={gameState.lives}
-        timeRemaining={gameState.timeRemaining}
-        level={gameState.level}
-        moves={gameState.moves}
-      />
+      <div className="pt-10 sm:pt-0">
+        <GameUI
+          score={gameState.score}
+          targetScore={config.targetScore}
+          lives={gameState.lives}
+          timeRemaining={gameState.timeRemaining}
+          level={gameState.level}
+          moves={gameState.moves}
+        />
+      </div>
 
-      {/* Game Board */}
-      <div className="mt-8">
+      {/* Game Board - centered with flex for better mobile layout */}
+      <div className="mt-2 sm:mt-4 md:mt-6 flex-1 flex items-start justify-center">
         <GameBoard
           ref={gameBoardRef}
           board={gameState.board}

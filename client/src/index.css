@@ -190,3 +190,47 @@
     }
   }
 }
+
+/* Mobile-optimized styles for smooth gameplay */
+@layer base {
+  /* Prevent pull-to-refresh and overscroll */
+  html, body {
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prevent text selection during gameplay */
+  .select-none {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+  }
+
+  /* Smoother touch interactions */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Fix for iOS safe areas */
+  @supports (padding: max(0px)) {
+    body {
+      padding-left: max(0px, env(safe-area-inset-left));
+      padding-right: max(0px, env(safe-area-inset-right));
+      padding-bottom: max(0px, env(safe-area-inset-bottom));
+    }
+  }
+
+  /* Smoother animations on mobile */
+  @media (prefers-reduced-motion: no-preference) {
+    * {
+      scroll-behavior: smooth;
+    }
+  }
+
+  /* Better font rendering */
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+}

@@ -156,20 +156,26 @@ export default function GamePiece({
 
   return (
     <AnimatePresence mode="wait">
-    <motion.div
+      <motion.div
         key={piece.id}
-      className="relative w-full h-full cursor-pointer"
-      onClick={onClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-        initial={{ scale: 0, rotate: -180, opacity: 0 }}
+        className="relative w-full h-full cursor-pointer select-none"
+        onClick={onClick}
+        onTouchStart={() => setIsHovered(true)}
+        onTouchEnd={() => setIsHovered(false)}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        initial={{ scale: 0, opacity: 0 }}
         animate={getAnimateState()}
         exit={{
           scale: 0,
           opacity: 0,
         }}
         transition={getTransition()}
-        whileTap={!isAnimating ? { scale: 0.92, rotate: -5 } : {}}
+        whileTap={!isAnimating ? { scale: 0.9 } : {}}
+        style={{
+          touchAction: 'manipulation',
+          WebkitTapHighlightColor: 'transparent',
+        }}
       >
         {/* Glow effect when matched */}
         {isMatched && (
