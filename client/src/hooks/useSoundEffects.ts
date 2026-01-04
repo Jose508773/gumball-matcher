@@ -9,17 +9,17 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Sound effect URLs - using free sounds from mixkit/pixabay
 const SOUNDS = {
-  // Match/pop sound
-  match: 'https://cdn.pixabay.com/audio/2022/03/24/audio_78c916d49e.mp3',
-  // Select/click sound  
+  // Match/pop sound - satisfying bubble pop perfect for candy/gumball
+  match: 'https://cdn.pixabay.com/audio/2022/03/15/audio_8d43f3c988.mp3',
+  // Select/click sound - soft tap  
   select: 'https://cdn.pixabay.com/audio/2022/03/10/audio_c8c8a73467.mp3',
-  // Combo/bonus sound
-  combo: 'https://cdn.pixabay.com/audio/2021/08/04/audio_12b0c7443c.mp3',
-  // Level complete
+  // Combo/bonus sound - magical chime
+  combo: 'https://cdn.pixabay.com/audio/2022/03/15/audio_8fc8a953b5.mp3',
+  // Level complete - victory fanfare
   levelComplete: 'https://cdn.pixabay.com/audio/2021/08/04/audio_0625c1539c.mp3',
-  // Game over
+  // Game over - soft game over
   gameOver: 'https://cdn.pixabay.com/audio/2022/03/15/audio_8bafa3df86.mp3',
-  // Invalid move
+  // Invalid move - gentle error
   invalid: 'https://cdn.pixabay.com/audio/2022/03/24/audio_2be76b62a4.mp3',
 };
 
@@ -112,12 +112,12 @@ export function useSoundEffects() {
   }, [isMuted, isLoaded]);
 
   // Convenience methods for common sounds
-  const playMatch = useCallback(() => playSound('match', 0.4), [playSound]);
-  const playSelect = useCallback(() => playSound('select', 0.3), [playSound]);
-  const playCombo = useCallback(() => playSound('combo', 0.5), [playSound]);
+  const playMatch = useCallback(() => playSound('match', 0.5), [playSound]);
+  const playSelect = useCallback(() => playSound('select', 0.25), [playSound]);
+  const playCombo = useCallback(() => playSound('combo', 0.6), [playSound]);
   const playLevelComplete = useCallback(() => playSound('levelComplete', 0.6), [playSound]);
   const playGameOver = useCallback(() => playSound('gameOver', 0.5), [playSound]);
-  const playInvalid = useCallback(() => playSound('invalid', 0.3), [playSound]);
+  const playInvalid = useCallback(() => playSound('invalid', 0.35), [playSound]);
 
   const toggleMute = useCallback(() => {
     setIsMuted(prev => !prev);
