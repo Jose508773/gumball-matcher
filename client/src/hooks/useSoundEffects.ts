@@ -1,26 +1,36 @@
 /**
  * Sound Effects Hook
  * - Plays satisfying sound effects for game events
- * - Uses Web Audio API for low-latency playback
+ * - Uses HTML Audio elements for reliable playback
  * - Respects user's mute preference
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-// Sound effect URLs - using free sounds from mixkit/pixabay
+// Sound effect URLs - using free sounds from pixabay
 const SOUNDS = {
-  // Match/pop sound - satisfying bubble pop perfect for candy/gumball
-  match: 'https://cdn.pixabay.com/audio/2022/03/15/audio_8d43f3c988.mp3',
+  // Match/pop sound - satisfying pop for candy/gumball matches
+  match: 'https://cdn.pixabay.com/audio/2022/10/30/audio_67e930b413.mp3',
   // Select/click sound - soft tap  
   select: 'https://cdn.pixabay.com/audio/2022/03/10/audio_c8c8a73467.mp3',
   // Combo/bonus sound - magical chime
-  combo: 'https://cdn.pixabay.com/audio/2022/03/15/audio_8fc8a953b5.mp3',
+  combo: 'https://cdn.pixabay.com/audio/2022/01/18/audio_8db1f1b5a2.mp3',
   // Level complete - victory fanfare
   levelComplete: 'https://cdn.pixabay.com/audio/2021/08/04/audio_0625c1539c.mp3',
   // Game over - soft game over
   gameOver: 'https://cdn.pixabay.com/audio/2022/03/15/audio_8bafa3df86.mp3',
   // Invalid move - gentle error
   invalid: 'https://cdn.pixabay.com/audio/2022/03/24/audio_2be76b62a4.mp3',
+};
+
+// Volume levels for each sound
+const VOLUMES: Record<string, number> = {
+  match: 0.5,
+  select: 0.25,
+  combo: 0.6,
+  levelComplete: 0.6,
+  gameOver: 0.5,
+  invalid: 0.35,
 };
 
 type SoundType = keyof typeof SOUNDS;
@@ -34,53 +44,28 @@ export function useSoundEffects() {
     return false;
   });
   
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const audioBuffersRef = useRef<Map<SoundType, AudioBuffer>>(new Map());
+  // Store preloaded audio elements
+  const audioPoolRef = useRef<Map<SoundType, HTMLAudioElement[]>>(new Map());
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Initialize AudioContext and preload sounds
+  // Preload all sounds on mount
   useEffect(() => {
-    // Create audio context on first user interaction
-    const initAudio = async () => {
-      if (audioContextRef.current) return;
-      
-      try {
-        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-        audioContextRef.current = new AudioContextClass();
-        
-        // Preload all sound effects
-        const loadPromises = Object.entries(SOUNDS).map(async ([key, url]) => {
-          try {
-            const response = await fetch(url);
-            const arrayBuffer = await response.arrayBuffer();
-            const audioBuffer = await audioContextRef.current!.decodeAudioData(arrayBuffer);
-            audioBuffersRef.current.set(key as SoundType, audioBuffer);
-          } catch (error) {
-            console.log(`Failed to load sound: ${key}`);
-          }
-        });
-        
-        await Promise.all(loadPromises);
-        setIsLoaded(true);
-      } catch (error) {
-        console.log('Web Audio API not supported');
-      }
+    const preloadSounds = () => {
+      Object.entries(SOUNDS).forEach(([key, url]) => {
+        // Create a pool of 3 audio elements per sound for overlapping playback
+        const pool: HTMLAudioElement[] = [];
+        for (let i = 0; i < 3; i++) {
+          const audio = new Audio(url);
+          audio.preload = 'auto';
+          audio.volume = VOLUMES[key] || 0.5;
+          pool.push(audio);
+        }
+        audioPoolRef.current.set(key as SoundType, pool);
+      });
+      setIsLoaded(true);
     };
 
-    // Initialize on any user interaction
-    const handleInteraction = () => {
-      initAudio();
-      window.removeEventListener('click', handleInteraction);
-      window.removeEventListener('touchstart', handleInteraction);
-    };
-
-    window.addEventListener('click', handleInteraction);
-    window.addEventListener('touchstart', handleInteraction);
-
-    return () => {
-      window.removeEventListener('click', handleInteraction);
-      window.removeEventListener('touchstart', handleInteraction);
-    };
+    preloadSounds();
   }, []);
 
   // Save mute preference
@@ -88,36 +73,34 @@ export function useSoundEffects() {
     localStorage.setItem('soundMuted', String(isMuted));
   }, [isMuted]);
 
-  // Play a sound effect
-  const playSound = useCallback((type: SoundType, volume: number = 0.5) => {
-    if (isMuted || !audioContextRef.current || !isLoaded) return;
+  // Play a sound effect using pooled audio elements
+  const playSound = useCallback((type: SoundType) => {
+    if (isMuted) return;
 
-    const buffer = audioBuffersRef.current.get(type);
-    if (!buffer) return;
+    const pool = audioPoolRef.current.get(type);
+    if (!pool || pool.length === 0) return;
 
+    // Find an audio element that's not playing, or use the first one
+    const audio = pool.find(a => a.paused || a.ended) || pool[0];
+    
     try {
-      const source = audioContextRef.current.createBufferSource();
-      const gainNode = audioContextRef.current.createGain();
-      
-      source.buffer = buffer;
-      gainNode.gain.value = volume;
-      
-      source.connect(gainNode);
-      gainNode.connect(audioContextRef.current.destination);
-      
-      source.start(0);
-    } catch (error) {
-      // Silently fail - sound effects are not critical
+      audio.currentTime = 0;
+      audio.volume = VOLUMES[type] || 0.5;
+      audio.play().catch(() => {
+        // Ignore autoplay errors - user hasn't interacted yet
+      });
+    } catch {
+      // Silently fail
     }
-  }, [isMuted, isLoaded]);
+  }, [isMuted]);
 
   // Convenience methods for common sounds
-  const playMatch = useCallback(() => playSound('match', 0.5), [playSound]);
-  const playSelect = useCallback(() => playSound('select', 0.25), [playSound]);
-  const playCombo = useCallback(() => playSound('combo', 0.6), [playSound]);
-  const playLevelComplete = useCallback(() => playSound('levelComplete', 0.6), [playSound]);
-  const playGameOver = useCallback(() => playSound('gameOver', 0.5), [playSound]);
-  const playInvalid = useCallback(() => playSound('invalid', 0.35), [playSound]);
+  const playMatch = useCallback(() => playSound('match'), [playSound]);
+  const playSelect = useCallback(() => playSound('select'), [playSound]);
+  const playCombo = useCallback(() => playSound('combo'), [playSound]);
+  const playLevelComplete = useCallback(() => playSound('levelComplete'), [playSound]);
+  const playGameOver = useCallback(() => playSound('gameOver'), [playSound]);
+  const playInvalid = useCallback(() => playSound('invalid'), [playSound]);
 
   const toggleMute = useCallback(() => {
     setIsMuted(prev => !prev);
