@@ -475,8 +475,8 @@ export default function Game() {
         />
       </div>
 
-      {/* Game Board - fills remaining space */}
-      <div className="flex-1 flex items-center justify-center min-h-0 py-1">
+      {/* Game Board - centered below UI */}
+      <div className="flex-1 flex items-start justify-center pt-1 sm:pt-2">
         <GameBoard
           ref={gameBoardRef}
           board={gameState.board}
