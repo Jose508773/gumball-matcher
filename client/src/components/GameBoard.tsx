@@ -180,36 +180,25 @@ const GameBoard = forwardRef<GameBoardRef, GameBoardProps>(function GameBoard({
   }, [isDragging]);
 
   return (
-    <motion.div
+    <div
       ref={boardRef}
-      className="w-full h-full max-w-[min(85vw,calc(100vh-180px),32rem)] max-h-[min(85vw,calc(100vh-180px),32rem)] sm:max-w-lg sm:max-h-[32rem] md:max-w-xl md:max-h-[36rem] lg:max-w-2xl lg:max-h-[40rem] mx-auto"
-      initial={{ scale: 0.95, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+      className="w-full max-w-[min(94vw,calc(100dvh-140px))] sm:max-w-lg md:max-w-xl lg:max-w-2xl mx-auto aspect-square"
     >
-      {/* Rainbow candy border animation */}
-      <motion.div
-        className="p-0.5 sm:p-1.5 md:p-2 rounded-xl sm:rounded-3xl md:rounded-[2rem] h-full"
+      {/* Rainbow candy border - simplified for performance */}
+      <div
+        className="p-0.5 sm:p-1 md:p-1.5 rounded-xl sm:rounded-2xl md:rounded-3xl h-full animate-gradient-slow"
         style={{
           background: 'linear-gradient(90deg, #FF6B6B, #FFE66D, #4ECDC4, #A78BFA, #F472B6, #FF6B6B)',
-          backgroundSize: '200% 100%',
-        }}
-        animate={{
-          backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-        }}
-        transition={{
-          duration: 4,
-          repeat: Infinity,
-          ease: 'linear',
+          backgroundSize: '300% 100%',
         }}
       >
         {/* Board container with rounded frame */}
         <div
           className={`
-            relative rounded-lg sm:rounded-2xl md:rounded-3xl overflow-hidden
+            relative rounded-lg sm:rounded-xl md:rounded-2xl overflow-hidden
             bg-gradient-to-b from-purple-900 via-purple-800 to-purple-900
-            p-1 sm:p-2 md:p-4 lg:p-6 shadow-2xl
-            border sm:border-2 md:border-4 border-white/30
+            p-0.5 sm:p-1 md:p-2 shadow-xl
+            border sm:border-2 border-white/30
             h-full
           `}
           style={{
@@ -219,58 +208,14 @@ const GameBoard = forwardRef<GameBoardRef, GameBoardProps>(function GameBoard({
             touchAction: 'manipulation', // Smoother touch handling
           }}
         >
-          {/* Candy shimmer overlay */}
-          <motion.div 
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background: 'linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.1) 50%, transparent 60%)',
-              backgroundSize: '200% 200%',
-            }}
-            animate={{
-              backgroundPosition: ['-100% -100%', '200% 200%'],
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: 'linear',
-            }}
-          />
-
           {/* Dark overlay for better piece visibility */}
-          <div className="absolute inset-0 bg-black/20 rounded-xl sm:rounded-2xl" />
-
-          {/* Floating candy decorations - hidden on very small screens */}
-          <div className="hidden sm:block">
-            {[...Array(6)].map((_, i) => (
-              <motion.div
-                key={`candy-${i}`}
-                className="absolute pointer-events-none text-lg sm:text-xl md:text-2xl"
-                style={{
-                  left: `${10 + (i % 3) * 40}%`,
-                  top: `${i < 3 ? -5 : 102}%`,
-                }}
-                animate={{
-                  y: [0, -8, 0],
-                  rotate: [-10, 10, -10],
-                  scale: [1, 1.1, 1],
-                }}
-                transition={{
-                  duration: 2 + i * 0.3,
-                  repeat: Infinity,
-                  delay: i * 0.2,
-                  ease: 'easeInOut',
-                }}
-              >
-                {['🍬', '🍭', '🍫', '🧁', '🍩', '🍪'][i]}
-              </motion.div>
-            ))}
-          </div>
+          <div className="absolute inset-0 bg-black/20 rounded-lg sm:rounded-xl" />
 
           {/* Grid container */}
-          <div className="relative w-full h-full aspect-square">
+          <div className="relative w-full h-full">
             <div
               ref={gridRef}
-              className={`w-full h-full grid ${getGapClass()} p-0.5 sm:p-1 md:p-2 lg:p-3 bg-black/30 rounded-md sm:rounded-xl md:rounded-2xl backdrop-blur-sm`}
+              className={`w-full h-full grid ${getGapClass()} p-0.5 sm:p-1 md:p-2 bg-black/30 rounded-md sm:rounded-lg md:rounded-xl`}
               style={{
                 gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
                 gridTemplateRows: `repeat(${gridSize}, 1fr)`,
@@ -280,27 +225,13 @@ const GameBoard = forwardRef<GameBoardRef, GameBoardProps>(function GameBoard({
             >
               {board.map((row, rowIndex) =>
                 row.map((piece, colIndex) => (
-                  <motion.div
+                  <div
                     key={piece.id}
-                    className="relative aspect-square cursor-grab active:cursor-grabbing"
-                    initial={{ scale: 0, y: -30, opacity: 0 }}
-                    animate={{ 
-                      scale: 1, 
-                      y: 0, 
-                      opacity: 1,
-                      // Subtle lift effect when dragging from this piece
-                      ...(dragStart?.row === rowIndex && dragStart?.col === colIndex && isDragging ? {
-                        scale: 1.1,
-                        zIndex: 10,
-                      } : {})
-                    }}
-                    transition={{
-                      delay: (rowIndex + colIndex) * 0.01,
-                      type: 'spring',
-                      stiffness: 400,
-                      damping: 25,
-                      mass: 0.6,
-                    }}
+                    className={`relative aspect-square cursor-grab active:cursor-grabbing transition-transform duration-100 ${
+                      dragStart?.row === rowIndex && dragStart?.col === colIndex && isDragging 
+                        ? 'scale-110 z-10' 
+                        : ''
+                    }`}
                     onTouchStart={(e) => handleTouchStart(e, rowIndex, colIndex)}
                     onTouchEnd={handleTouchEnd}
                     onMouseDown={(e) => handleMouseDown(e, rowIndex, colIndex)}
@@ -316,14 +247,14 @@ const GameBoard = forwardRef<GameBoardRef, GameBoardProps>(function GameBoard({
                       isAnimating={isAnimating}
                       isDragging={dragStart?.row === rowIndex && dragStart?.col === colIndex && isDragging}
                     />
-                  </motion.div>
+                  </div>
                 ))
               )}
             </div>
           </div>
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 });
 

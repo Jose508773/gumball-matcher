@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { motion, useAnimation } from 'framer-motion';
+import { motion } from 'framer-motion';
 import GameBoard, { GameBoardRef } from '@/components/GameBoard';
 import GameUI from '@/components/GameUI';
 import ParticleEffects, { ParticlePosition } from '@/components/ParticleEffects';
@@ -59,7 +59,6 @@ export default function Game() {
     originalBoard: GamePiece[][];
   } | null>(null);
   const comboCountRef = useRef(0);
-  const screenShakeControls = useAnimation();
 
   // Initialize game
   useEffect(() => {
@@ -184,16 +183,6 @@ export default function Game() {
           setComboTrigger(true);
           setTimeout(() => setComboTrigger(false), 100);
           playCombo(); // Extra combo sound
-        }
-
-        // Screen shake for big matches (5+ pieces or combo 3+)
-        if (matchedIds.size >= 5 || currentCombo >= 3) {
-          const shakeIntensity = Math.min(matchedIds.size, 10);
-          screenShakeControls.start({
-            x: [0, -shakeIntensity, shakeIntensity, -shakeIntensity/2, shakeIntensity/2, 0],
-            y: [0, shakeIntensity/2, -shakeIntensity/2, shakeIntensity/3, 0],
-            transition: { duration: 0.4, ease: 'easeOut' },
-          });
         }
 
         // Update game state with matches
@@ -454,30 +443,28 @@ export default function Game() {
   const config = getLevelConfig(gameState.level);
 
   return (
-    <motion.div
-      animate={screenShakeControls}
-      className="h-screen h-[100dvh] bg-gradient-to-b from-pink-200 via-purple-200 to-cyan-200 p-2 sm:p-4 md:p-6 overflow-hidden flex flex-col"
+    <div
+      className="h-screen h-[100dvh] bg-gradient-to-b from-pink-200 via-purple-200 to-cyan-200 p-1.5 sm:p-3 md:p-6 overflow-hidden flex flex-col"
       style={{
         backgroundImage: `url('/images/game-background.png')`,
         backgroundSize: 'cover',
-        backgroundAttachment: 'fixed',
         touchAction: 'manipulation', // Prevent double-tap zoom on mobile
       }}
     >
       {/* Home button - positioned absolutely */}
-      <div className="absolute top-2 right-2 z-20">
+      <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 z-20">
         <Button
           onClick={handleHome}
           variant="outline"
           size="icon"
-          className="rounded-full w-9 h-9 sm:w-12 sm:h-12 border-2 sm:border-4 border-white bg-white/80 hover:bg-white shadow-lg active:scale-95 transition-transform"
+          className="rounded-full w-8 h-8 sm:w-10 sm:h-10 border-2 border-white bg-white/80 hover:bg-white shadow-md active:scale-95"
         >
-          <Home className="w-4 h-4 sm:w-6 sm:h-6 text-primary" />
+          <Home className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
         </Button>
       </div>
 
       {/* Game UI - compact on mobile */}
-      <div className="flex-shrink-0">
+      <div className="flex-shrink-0 pr-10 sm:pr-0">
         <GameUI
           score={gameState.score}
           targetScore={config.targetScore}
@@ -488,8 +475,8 @@ export default function Game() {
         />
       </div>
 
-      {/* Game Board - fills remaining space and centers */}
-      <div className="flex-1 flex items-center justify-center min-h-0 py-1 sm:py-2">
+      {/* Game Board - starts right after UI */}
+      <div className="flex-1 flex items-start justify-center min-h-0">
         <GameBoard
           ref={gameBoardRef}
           board={gameState.board}
@@ -541,6 +528,6 @@ export default function Game() {
         onRetry={handleRetryLevel}
         onHome={handleHome}
       />
-    </motion.div>
+    </div>
   );
 }
