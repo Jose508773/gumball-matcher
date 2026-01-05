@@ -444,7 +444,7 @@ export default function Game() {
 
   return (
     <div
-      className="h-screen h-[100dvh] bg-gradient-to-b from-pink-200 via-purple-200 to-cyan-200 p-1.5 sm:p-3 md:p-6 overflow-hidden flex flex-col"
+      className="h-screen h-[100dvh] bg-gradient-to-b from-pink-200 via-purple-200 to-cyan-200 p-1 sm:p-2 md:p-4 overflow-hidden flex flex-col"
       style={{
         backgroundImage: `url('/images/game-background.png')`,
         backgroundSize: 'cover',
@@ -452,19 +452,19 @@ export default function Game() {
       }}
     >
       {/* Home button - positioned absolutely */}
-      <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 z-20">
+      <div className="absolute top-1 right-1 sm:top-2 sm:right-2 z-20">
         <Button
           onClick={handleHome}
           variant="outline"
           size="icon"
-          className="rounded-full w-8 h-8 sm:w-10 sm:h-10 border-2 border-white bg-white/80 hover:bg-white shadow-md active:scale-95"
+          className="rounded-full w-7 h-7 sm:w-10 sm:h-10 border-2 border-white bg-white/80 hover:bg-white shadow-md active:scale-95"
         >
-          <Home className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+          <Home className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-primary" />
         </Button>
       </div>
 
       {/* Game UI - compact on mobile */}
-      <div className="flex-shrink-0 pr-10 sm:pr-0">
+      <div className="flex-shrink-0 pr-8 sm:pr-0">
         <GameUI
           score={gameState.score}
           targetScore={config.targetScore}
@@ -475,8 +475,8 @@ export default function Game() {
         />
       </div>
 
-      {/* Game Board - starts right after UI */}
-      <div className="flex-1 flex items-start justify-center min-h-0">
+      {/* Game Board - fills remaining space */}
+      <div className="flex-1 flex items-center justify-center min-h-0 py-1">
         <GameBoard
           ref={gameBoardRef}
           board={gameState.board}

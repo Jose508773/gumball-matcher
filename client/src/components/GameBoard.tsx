@@ -182,7 +182,7 @@ const GameBoard = forwardRef<GameBoardRef, GameBoardProps>(function GameBoard({
   return (
     <div
       ref={boardRef}
-      className="w-full max-w-[min(94vw,calc(100dvh-140px))] sm:max-w-lg md:max-w-xl lg:max-w-2xl mx-auto aspect-square"
+      className="w-full h-full max-w-full max-h-full sm:max-w-lg sm:max-h-[32rem] md:max-w-xl md:max-h-[36rem] lg:max-w-2xl lg:max-h-[40rem] mx-auto aspect-square"
     >
       {/* Rainbow candy border - simplified for performance */}
       <div
